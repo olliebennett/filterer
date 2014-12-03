@@ -75,7 +75,10 @@ And in your controller:
 ```ruby
 class PeopleController < ApplicationController
   def index
-    @filterer = PersonFilterer.new(params)
+    @filterer = People.filterer(params)
+
+    # Or the more verbose version:
+    # PeopleFilterer.new(params, starting_query: People.all)
   end
 end
 ```
@@ -106,20 +109,14 @@ In your view:
 
 ```ruby
 class PersonFilterer < Filterer::Base
-  def starting_query
-    @opts[:organization].people.where('deleted_at IS NULL')
+  def param_ssn(x)
+    if @opts[:is_admin]
+      @results.where(ssn: x)
+    else
+      @results
+    end
   end
 end
-```
-
-or
-
-```ruby
-class PersonFilterer < Filterer::Base
-end
-
-# In your controller...
-PersonFilterer.new(params, starting_query: @organization.people)
 ```
 
 #### Overriding per_page
